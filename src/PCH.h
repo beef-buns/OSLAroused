@@ -68,7 +68,6 @@ template <class F, class T> void write_vfunc() { write_vfunc<F, 0, T>(); }
 } // namespace stl
 
 namespace logger = SKSE::log;
-namespace WinAPI = SKSE::WinAPI;
 
 namespace util {
 using SKSE::stl::report_and_fail;
