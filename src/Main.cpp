@@ -5,100 +5,110 @@
 #include "Papyrus/PapyrusConfig.h"
 #include "Papyrus/PapyrusInterface.h"
 
+#include "Config.h"
 #include "RuntimeEvents.h"
 #include "Utilities/Utils.h"
-#include "Config.h"
 
 using namespace RE::BSScript;
 using namespace SKSE::log;
 using namespace SKSE::stl;
 
-namespace
-{
-	void InitializeLogging()
-	{
-		auto path = log_directory();
-		if (!path)
-		{
-			report_and_fail("Unable to lookup SKSE logs directory.");
-		}
-		*path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
-		*path += L".log";
+namespace {
+void InitializeLogging() {
+  auto path = log_directory();
+  if (!path) {
+    report_and_fail("Unable to lookup SKSE logs directory.");
+  }
+  *path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
+  *path += L".log";
 
-		std::shared_ptr<spdlog::logger> log;
-		if (IsDebuggerPresent())
-		{
-			log = std::make_shared<spdlog::logger>(
-				"Global", std::make_shared<spdlog::sinks::msvc_sink_mt>());
-		}
-		else
-		{
-			log = std::make_shared<spdlog::logger>(
-				"Global", std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true));
-		}
-		log->set_level(spdlog::level::debug);
-		log->flush_on(spdlog::level::trace);
+  std::shared_ptr<spdlog::logger> log;
+  if (IsDebuggerPresent()) {
+    log = std::make_shared<spdlog::logger>(
+        "Global", std::make_shared<spdlog::sinks::msvc_sink_mt>());
+  } else {
+    log = std::make_shared<spdlog::logger>(
+        "Global", std::make_shared<spdlog::sinks::basic_file_sink_mt>(
+                      path->string(), true));
+  }
+  log->set_level(spdlog::level::debug);
+  log->flush_on(spdlog::level::trace);
 
-		spdlog::set_default_logger(std::move(log));
-		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%t] [%s:%#] %v");
-	}
-
-	void InitializeSerialization()
-	{
-		SKSE::log::trace("Initializing cosave serialization...");
-		auto* serialization = SKSE::GetSerializationInterface();
-		serialization->SetUniqueID(PersistedData::kArousalDataKey);
-		serialization->SetSaveCallback(PersistedData::SaveCallback);
-		serialization->SetRevertCallback(PersistedData::RevertCallback);
-		serialization->SetLoadCallback(PersistedData::LoadCallback);
-		SKSE::log::trace("Cosave serialization initialized.");
-	}
-
-	void InitializePapyrus()
-	{
-		SKSE::log::trace("Initializing Papyrus binding...");
-		const auto papyrus = SKSE::GetPapyrusInterface();
-		papyrus->Register(Papyrus::RegisterFunctions);
-		papyrus->Register(PapyrusInterface::RegisterFunctions);
-		papyrus->Register(PapyrusConfig::RegisterFunctions);
-		papyrus->Register(PapyrusActor::RegisterFunctions);
-	}
-
-	void InitializeMessaging() 
-	{
-		if (!SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* message) {
-			switch (message->type) {
-			case SKSE::MessagingInterface::kDataLoaded:  // All ESM/ESL/ESP plugins have loaded, main menu is now active
-				RuntimeEvents::OnEquipEvent::RegisterEvent();
-				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
-				Config::GetSingleton()->LoadINIs();
-				break;
-			case SKSE::MessagingInterface::kPostLoadGame:
-				//Distribute Persisted Keywords
-				Utilities::Keywords::DistributeKeywords();
-				break;
-			} }
-		))
-		{
-			SKSE::stl::report_and_fail("Unable to register message listener.");
-		}
-	}
+  spdlog::set_default_logger(std::move(log));
+  spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%t] [%s:%#] %v");
 }
 
-SKSEPluginLoad(const SKSE::LoadInterface* skse) 
-{
-	InitializeLogging();
+void InitializeSerialization() {
+  SKSE::log::trace("Initializing cosave serialization...");
+  auto *serialization = SKSE::GetSerializationInterface();
+  serialization->SetUniqueID(PersistedData::kArousalDataKey);
+  serialization->SetSaveCallback(PersistedData::SaveCallback);
+  serialization->SetRevertCallback(PersistedData::RevertCallback);
+  serialization->SetLoadCallback(PersistedData::LoadCallback);
+  SKSE::log::trace("Cosave serialization initialized.");
+}
 
-	auto* plugin = SKSE::PluginDeclaration::GetSingleton();
-	auto version = plugin->GetVersion();
-	SKSE::log::info("{} {} is loading...", plugin->GetName(), version);
+void InitializePapyrus() {
+  SKSE::log::trace("Initializing Papyrus binding...");
+  const auto papyrus = SKSE::GetPapyrusInterface();
+  papyrus->Register(Papyrus::RegisterFunctions);
+  papyrus->Register(PapyrusInterface::RegisterFunctions);
+  papyrus->Register(PapyrusConfig::RegisterFunctions);
+  papyrus->Register(PapyrusActor::RegisterFunctions);
+}
 
-	SKSE::Init(skse);
+void InitializeMessaging() {
+  if (!SKSE::GetMessagingInterface()->RegisterListener(
+          [](SKSE::MessagingInterface::Message *message) {
+            switch (message->type) {
+            case SKSE::MessagingInterface::
+                kDataLoaded: // All ESM/ESL/ESP plugins have loaded, main menu
+                             // is now active
+              RuntimeEvents::OnEquipEvent::RegisterEvent();
+              WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
+              Config::GetSingleton()->LoadINIs();
+              break;
+            case SKSE::MessagingInterface::kPostLoadGame:
+              // Distribute Persisted Keywords
+              Utilities::Keywords::DistributeKeywords();
+              break;
+            }
+          })) {
+    SKSE::stl::report_and_fail("Unable to register message listener.");
+  }
+}
+} // namespace
 
-	InitializeMessaging();
-	InitializeSerialization();
-	InitializePapyrus();
+extern "C" DLLEXPORT bool SKSEAPI
+SKSEPlugin_Load(const SKSE::LoadInterface *a_skse) {
+  InitializeLogging();
+  auto *plugin = SKSE::PluginDeclaration::GetSingleton();
+  auto version = plugin->GetVersion();
+  SKSE::log::info("{} {} is loading...", plugin->GetName(), version);
 
-	SKSE::log::info("{} has finished loading.", plugin->GetName());
-	return true;
+  SKSE::Init(a_skse);
+
+  InitializeMessaging();
+  InitializeSerialization();
+  InitializePapyrus();
+
+  SKSE::log::info("{} has finished loading.", plugin->GetName());
+  return true;
+}
+
+extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() noexcept {
+  SKSE::PluginVersionData v;
+  v.PluginName(Plugin::NAME.data());
+  v.PluginVersion(Plugin::VERSION);
+  v.UsesAddressLibrary(true);
+  v.HasNoStructUse();
+  return v;
+}();
+
+extern "C" DLLEXPORT bool SKSEAPI
+SKSEPlugin_Query(const SKSE::QueryInterface *, SKSE::PluginInfo *pluginInfo) {
+  pluginInfo->name = SKSEPlugin_Version.pluginName;
+  pluginInfo->infoVersion = SKSE::PluginInfo::kVersion;
+  pluginInfo->version = SKSEPlugin_Version.pluginVersion;
+  return true;
 }

@@ -40,7 +40,7 @@ bool Papyrus::AddKeywordToForm(RE::StaticFunctionTag*, RE::TESForm* form, RE::BG
 	if (!form || !keyword) {
 		return false;
 	}
-	
+
 	return Utilities::Keywords::AddKeyword(form, keyword);
 }
 
@@ -119,7 +119,7 @@ bool Papyrus::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 {
 	//General State
 
-	
+
 	//Actor State
 	vm->RegisterFunction("IsActorNaked", "OSLArousedNative", IsActorNaked);
 
@@ -134,10 +134,10 @@ bool Papyrus::RegisterFunctions(RE::BSScript::IVirtualMachine* vm)
 	vm->RegisterFunction("FormHasKeywordString", "OSLArousedNative", FormHasKeywordString);
 	vm->RegisterFunction("GetRegisteredKeywords", "OSLArousedNative", GetRegisteredKeywords);
 	vm->RegisterFunction("RegisterNewKeyword", "OSLArousedNative", RegisterNewKeyword);
-	
+
 	//Utilities
 	vm->RegisterFunction("GenerateRandomFloat", "OSLArousedNative", GenerateRandomFloat);
-	
+
 	//Debug
 	vm->RegisterFunction("DumpArousalData", "OSLArousedNative", DumpArousalData);
 	vm->RegisterFunction("ClearAllArousalData", "OSLArousedNative", ClearAllArousalData);

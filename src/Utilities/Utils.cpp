@@ -183,7 +183,7 @@ void Utilities::logInvalidArgsVerbose(const char* fnName) {
 }
 
 void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float radius,
-    std::function<RE::BSContainer::ForEachResult(RE::TESObjectREFR& ref)> callback) {
+    std::function<RE::BSContainer::ForEachResult(RE::TESObjectREFR* ref)> callback) {
 
     if (origin && radius > 0.0f) {
         const auto originPos = origin->GetPosition();
@@ -191,7 +191,7 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
         auto* interiorCell = tesSingleton->interiorCell;
         if (interiorCell) {
             interiorCell->ForEachReferenceInRange(originPos, radius,
-                                                  [&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
+                                                  [&](RE::TESObjectREFR* a_ref) { return callback(a_ref); });
         } else {
             if (const auto gridLength = tesSingleton->gridCells ? tesSingleton->gridCells->length : 0; gridLength > 0) {
                 const float yPlus = originPos.y + radius;
@@ -208,7 +208,7 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
                                 const RE::NiPoint2 worldPos{cellCoords->worldX, cellCoords->worldY};
                                 if (worldPos.x < xPlus && (worldPos.x + 4096.0f) > xMinus && worldPos.y < yPlus &&
                                     (worldPos.y + 4096.0f) > yMinus) {
-                                    cell->ForEachReferenceInRange(originPos, radius, [&](RE::TESObjectREFR& a_ref) {
+                                    cell->ForEachReferenceInRange(originPos, radius, [&](RE::TESObjectREFR* a_ref) {
                                         return callback(a_ref);
                                     });
                                 }
@@ -221,6 +221,6 @@ void Utilities::World::ForEachReferenceInRange(RE::TESObjectREFR* origin, float 
             }
         }
     } else {
-        RE::TES::GetSingleton()->ForEachReference([&](RE::TESObjectREFR& a_ref) { return callback(a_ref); });
+        RE::TES::GetSingleton()->ForEachReference([&](RE::TESObjectREFR* a_ref) { return callback(a_ref); });
     }
 }
