@@ -23,7 +23,15 @@
     },
     "plugin": {
       "description": "Build the SKSE plugin.",
-      "dependencies": ["commonlibsse-ng"]
+      "dependencies": [
+        "rsm-binary-io",
+        "spdlog",
+        "boost-stl-interfaces",
+        "frozen",
+        "directxtk",
+        "catch2",
+        "rapidcsv"
+      ]
     }
   },
   "default-features": ["scripts-dev", "plugin"]

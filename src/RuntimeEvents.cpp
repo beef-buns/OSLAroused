@@ -39,6 +39,9 @@ RE::BSEventNotifyControl RuntimeEvents::OnEquipEvent::ProcessEvent(const RE::TES
 			ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
 		} else if (const auto keywordForm = armor->As<RE::BGSKeywordForm>()) {
             //Check for ArmorCuirass keyword as a backup
+			//if (armor->HasKeywordByEditorID("ArmorCuirass")) {
+             //       ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
+			//}
             for (uint32_t i = 0; i < keywordForm->numKeywords; i++) {
                 if(keywordForm->keywords[i]->formEditorID == "ArmorCuirass") {
                     ActorStateManager::GetSingleton()->ActorNakedStateChanged(static_cast<RE::Actor*>(equipEvent->actor.get()), !equipEvent->equipped);
@@ -63,7 +66,7 @@ void HandleAdultScenes(std::vector<SceneManager::SceneData> activeScenes, float 
 	std::set<RE::Actor*> spectatingActors;
 	for (const auto scene : activeScenes) {
 		if (scene.Participants.size() <= 0) {
-			logger::warn("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
+		//	logger::warn("HandleAdultScenes: Skipping sceneid: {} no participants found", scene.SceneId);
 			continue;
 		}
 
@@ -115,17 +118,17 @@ std::vector<RE::Actor*> GetNakedActorsInCell(RE::Actor* source)
 	std::vector<RE::Actor*> nakedActors;
 
 	if (!source || !source->parentCell) {
-		logger::warn("GetNakedActorsInCell - source can not be null");
+		//logger::warn("GetNakedActorsInCell - source can not be null");
 		return nakedActors;
 	}
 
 	float scanDistance = Settings::GetSingleton()->GetScanDistance();
 	const auto actorStateManager = ActorStateManager::GetSingleton();
 
-	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR& ref) {
-		auto refBase = ref.GetBaseObject();
-		auto actor = ref.As<RE::Actor>();
-		if (actor && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+	Utilities::World::ForEachReferenceInRange(source, scanDistance, [&](RE::TESObjectREFR* ref) {
+		auto refBase = ref->GetBaseObject();
+		auto actor = ref->As<RE::Actor>();
+		if (actor && !actor->IsDisabled() && (ref->Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			if(actorStateManager->IsHumanoidActor(actor) && actorStateManager->GetActorNaked(actor)) {
 				//If Actor is naked
 				nakedActors.push_back(actor);
@@ -153,12 +156,12 @@ std::vector<RE::Actor*> GetNearbySpectatingActors(RE::Actor* source, float radiu
 	radius *= radius;
 
 	const auto sourceLocation = source->GetPosition();
-    Utilities::World::ForEachReferenceInRange(source, radius, [&](RE::TESObjectREFR& ref) {
-		auto refBase = ref.GetBaseObject();
-		auto actor = ref.As<RE::Actor>();
-		if (actor && actor != source && !actor->IsDisabled() && (ref.Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
+    Utilities::World::ForEachReferenceInRange(source, radius, [&](RE::TESObjectREFR* ref) {
+		auto refBase = ref->GetBaseObject();
+		auto actor = ref->As<RE::Actor>();
+		if (actor && actor != source && !actor->IsDisabled() && (ref->Is(RE::FormType::NPC) || (refBase && refBase->Is(RE::FormType::NPC)))) {
 			//If Actor is super close or detects the source, increase arousal
-			if (sourceLocation.GetSquaredDistance(ref.GetPosition()) < forceDetectDistance || (actor->RequestDetectionLevel(source, RE::DETECTION_PRIORITY::kNormal) > 0) || actor->IsPlayer()) {
+			if (sourceLocation.GetSquaredDistance(ref->GetPosition()) < forceDetectDistance || (actor->RequestDetectionLevel(source, RE::DETECTION_PRIORITY::kNormal) > 0) || actor->IsPlayer()) {
 				nearbyActors.push_back(actor);
 			}
 		}

@@ -1,18 +1,37 @@
 <?xml version='1.0'?>
 <PapyrusProject xmlns="PapyrusProject.xsd"
-    Flags="TESV_Papyrus_Flags.flg"
-    Game="sse"
-    Output="contrib/Distribution/PapyrusRelease"
-    Optimize="true"
-    Release="true"
-    Anonymize="true"
-    Final="true">
-    <Imports>
-        <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
-        <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skyrim</Import>
-        <Import>C:\dev\Skyrim\PapyrusScripts</Import>
-    </Imports>
-    <Folders>
-        <Folder>.\contrib\Distribution\PapyrusSources</Folder>
+  Flags="TESV_Papyrus_Flags.flg"
+  Game="sse"
+  Output="contrib/Distribution/PapyrusRelease"
+  Optimize="true"
+  Release="true"
+  Anonymize="true"
+  Final="true">
+  <Variables>
+    <Variable Name="MO2" Value="D:\Modding\dev_skyrimse\mods"/>
+    <Variable Name="DEV" Value="D:\Modding\dev_skyrimse\dev"/>
+  </Variables>
+  <Imports>
+    <Import>@MO2\Slave Tats\Source\Scripts</Import>
+    <Import>@MO2\OSL Aroused\Scripts\Source</Import>
+    <Import>@MO2\Apropos - PPLUS\Scripts\Source</Import>
+    <Import>@MO2\SexLab Framework PPLUS\Source\Scripts</Import>
+    <Import>@MO2\MfgFix NG\source\scripts</Import>
+    <Import>@MO2\Mfg Fix\source\scripts</Import>
+    <!-- <Import>@MO2\Schlongs of Skyrim SE\scripts\source</Import> -->
+    <Import>@MO2\FNIS Creature Pack SE 7.6\source\scripts</Import>
+    <Import>@MO2\Fores New Idles in Skyrim SE - FNIS SE\source\scripts</Import>
+    <Import>@DEV\SkyUI-SDK\Scripts\Source</Import>
+    <Import>@MO2\SkyUI\Scripts\Source</Import>
+    <Import>@DEV\RaceMenu\source\scripts</Import>
+    <Import>@MO2\JContainers SE\scripts\source</Import>
+    <Import>@MO2\PapyrusUtil SE - Modders Scripting Utility Functions\Source\Scripts</Import>
+
+    <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
+    <Import>.\build\release-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skyrim</Import>
+  </Imports>
+
+  <Folders>
+    <Folder>.\contrib\Distribution\PapyrusSources</Folder>
     </Folders>
 </PapyrusProject>

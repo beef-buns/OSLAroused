@@ -2,16 +2,36 @@
 <PapyrusProject xmlns="PapyrusProject.xsd"
     Flags="TESV_Papyrus_Flags.flg"
     Game="sse"
-    Output="C:\Users\jel-m\AppData\Local\ModOrganizer\Skyrim Special Edition\mods\OSL Aroused\Scripts"
+    Output="D:\Modding\dev_skyrimse\mods\OSLAroused - Dev\Scripts"
     Optimize="false"
     Release="false"
     Anonymize="true"
     Final="false">
-    <Imports>
-        <Import>.\build\debug-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
-        <Import>.\build\debug-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skyrim</Import>
-        <Import>C:\dev\Skyrim\PapyrusScripts</Import>
-    </Imports>
+      <Variables>
+    <Variable Name="MO2" Value="D:\Modding\dev_skyrimse\mods"/>
+    <Variable Name="DEV" Value="D:\Modding\dev_skyrimse\dev"/>
+  </Variables>
+
+  <Imports>
+    <Import>@MO2\OStim Standalone - Advanced Adult Animation Framework\Scripts\Source</Import>
+    <Import>@MO2\SexLab Framework PPLUS\Source\Scripts</Import>
+    <Import>@MO2\MfgFix NG\source\scripts</Import>
+    <Import>@MO2\Mfg Fix\source\scripts</Import>
+    <!-- <Import>@MO2\Schlongs of Skyrim SE\scripts\source</Import> -->
+    <Import>@DEV\ConsoleUtilSSE - Papyrus API\Scripts\Source</Import>
+    <Import>@MO2\FNIS Creature Pack SE 7.6\source\scripts</Import>
+    <Import>@MO2\Fores New Idles in Skyrim SE - FNIS SE\source\scripts</Import>
+    <Import>@DEV\SkyUI-SDK\Scripts\Source</Import>
+    <Import>@MO2\SkyUI\Scripts\Source</Import>
+    <Import>@DEV\RaceMenu\source\scripts</Import>
+    <Import>@MO2\JContainers SE\scripts\source</Import>
+    <Import>@MO2\PapyrusUtil SE - Modders Scripting Utility Functions\Source\Scripts</Import>
+
+    <Import>.\build\debug-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skse</Import>
+    <Import>.\build\debug-msvc\vcpkg_installed\x64-windows-skse\contrib\papyrus\skyrim</Import>
+
+  </Imports>
+
     <Folders>
         <Folder>.\contrib\Distribution\PapyrusSources</Folder>
     </Folders>

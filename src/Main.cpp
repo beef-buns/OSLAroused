@@ -7,6 +7,7 @@
 
 #include "RuntimeEvents.h"
 #include "Utilities/Utils.h"
+#include "Plugin.h"
 #include "Config.h"
 
 using namespace RE::BSScript;
@@ -15,32 +16,33 @@ using namespace SKSE::stl;
 
 namespace
 {
+
 	void InitializeLogging()
 	{
-		auto path = log_directory();
-		if (!path)
-		{
-			report_and_fail("Unable to lookup SKSE logs directory.");
+#ifndef NDEBUG
+		auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+#else
+		auto path = logger::log_directory();
+		if (!path) {
+			util::report_and_fail("Failed to find standard logging directory"sv);
 		}
-		*path /= SKSE::PluginDeclaration::GetSingleton()->GetName();
-		*path += L".log";
 
-		std::shared_ptr<spdlog::logger> log;
-		if (IsDebuggerPresent())
-		{
-			log = std::make_shared<spdlog::logger>(
-				"Global", std::make_shared<spdlog::sinks::msvc_sink_mt>());
-		}
-		else
-		{
-			log = std::make_shared<spdlog::logger>(
-				"Global", std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true));
-		}
-		log->set_level(spdlog::level::debug);
-		log->flush_on(spdlog::level::trace);
+		*path /= fmt::format("{}.log"sv, Plugin::NAME);
+		auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+#endif
+
+#ifndef NDEBUG
+		const auto level = spdlog::level::trace;
+#else
+		const auto level = spdlog::level::info;
+#endif
+
+		auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+		log->set_level(level);
+		log->flush_on(level);
 
 		spdlog::set_default_logger(std::move(log));
-		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] [%t] [%s:%#] %v");
+		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%l] [%t] [%s:%#] %v"s);
 	}
 
 	void InitializeSerialization()
@@ -84,8 +86,7 @@ namespace
 		}
 	}
 }
-
-SKSEPluginLoad(const SKSE::LoadInterface* skse) 
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
 	InitializeLogging();
 
@@ -93,12 +94,29 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 	auto version = plugin->GetVersion();
 	SKSE::log::info("{} {} is loading...", plugin->GetName(), version);
 
-	SKSE::Init(skse);
+	SKSE::Init(a_skse);
 
 	InitializeMessaging();
 	InitializeSerialization();
 	InitializePapyrus();
 
 	SKSE::log::info("{} has finished loading.", plugin->GetName());
+	return true;
+}
+
+extern "C" DLLEXPORT constinit auto SKSEPlugin_Version = []() noexcept {
+	SKSE::PluginVersionData v;
+	v.PluginName(Plugin::NAME.data());
+	v.PluginVersion(Plugin::VERSION);
+	v.UsesAddressLibrary(true);
+	v.UsesNoStructs(true);
+	return v;
+	}();
+
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface*, SKSE::PluginInfo* pluginInfo)
+{
+	pluginInfo->name = SKSEPlugin_Version.pluginName;
+	pluginInfo->infoVersion = SKSE::PluginInfo::kVersion;
+	pluginInfo->version = SKSEPlugin_Version.pluginVersion;
 	return true;
 }

@@ -17,56 +17,77 @@ bool function LoadAdapter()
 	RegisterForModEvent("HookStageStart", "OnStageStart")
 	RegisterForModEvent("SexLabOrgasm", "OnSexLabOrgasm")
 
-    SLSODetected = Game.GetModByName("SLSO.esp") != 255
+    SLSODetected = true
     return true
 endfunction
 
 event OnAnimationStart(int tid, bool hasPlayer)
-    SexLabFramework sexlab = SexLabUtil.GetAPI() 
+    SexLabFramework sexlab = SexLabUtil.GetAPI()
     if(!sexlab)
         return
     endif
-    sslThreadController controller = sexlab.GetController(tid)
+    SexLabThread thread = SexLab.GetThread(tid)
+    ; sslThreadController controller = sexlab.GetController(tid)
     ;If this event came from ostimlab (ie its a OStim scene, then dont process)
-    If (controller.HasTag("OStimLab"))
+    If (thread.HasTag("OStimLab"))
         return
     EndIf
     Log("OnAnimationStart")
-    OSLArousedNative.RegisterSceneStart(false, tid, controller.Positions)
 
-    ;OArousal mode sends a blast on scene start
-    OSLAroused_ModInterface.ModifyArousalMultiple(controller.Positions, Main.SceneBeginArousalGain, "Sexlab Animation Start")
+    Actor[] actors = thread.GetPositions()
+    OSLArousedNative.RegisterSceneStart(false, tid, actors)
+
+    ;TODO: Add lewd faction check or whatever it is
+
+    if thread.IsConsent() || Main.VictimGainsArousal
+        ;OArousal mode sends a blast on scene start
+        OSLAroused_ModInterface.ModifyArousalMultiple(actors, Main.SceneBeginArousalGain, "Sexlab Animation Start")
+    else
+        int i = actors.Length
+        while(i > 0)
+            Actor act = actors[i]
+            if !thread.GetSubmissive(act)
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneBeginArousalGain, "SexLab Animation Start - Aggressor")
+            else
+                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneBeginArousalGain * -1, "SexLab Animation Start - Aggressor")
+            endif
+        endwhile
+
+    endif
 endevent
 
 event OnAnimationEnd(int tid, bool hasPlayer)
     OSLArousedNative.RemoveScene(false, tid)
 
-    SexLabFramework sexlab = SexLabUtil.GetAPI() 
+    SexLabFramework sexlab = SexLabUtil.GetAPI()
     if(!sexlab)
         return
     endif
     ;increase arousal for actors who did not org
-    sslThreadController controller = sexlab.GetController(tid)
+    ; sslThreadController controller = sexlab.GetController(tid)
+    SexLabThread thread = SexLab.GetThread(tid)
 
     ;If this event came from ostimlab (ie its a OStim scene, then dont process)
-    If (controller.HasTag("OStimLab"))
+    If (thread.HasTag("OStimLab"))
         return
     EndIf
 
-    int i = controller.Positions.Length
+    OSLArousedNative.RemoveScene(false, tid)
+
+    Actor[] actors = thread.GetPositions()
+
+    int i = actors.Length
     while(i > 0)
         i -= 1
-        actor act = controller.Positions[i]
+        Actor act = actors[i]
 
 
-        if(SLSODetected)
-            if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
-                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - SLSO orgasm")
-            elseif(Main.VictimGainsArousal || !controller.IsVictim(act))
-                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
-            endif
-        else
-            OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - no orgasm (no SLSO)")
+        ; if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
+        ;     OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - SLSO orgasm")
+        if(thread.IsConsent())
+            OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
+        elseif (!thread.GetSubmissive(act) || (Main.VictimGainsArousal && thread.GetSubmissive(act)))
+            OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
         endif
     endwhile
 endevent
@@ -76,7 +97,7 @@ Event OnStageStart(int tid, bool HasPlayer)
         return
     EndIf
 
-    SexLabFramework sexlab = SexLabUtil.GetAPI() 
+    SexLabFramework sexlab = SexLabUtil.GetAPI()
     if(!sexlab)
         return
     endif
@@ -108,22 +129,29 @@ endevent
 
 Event OnSexLabOrgasm(Form actorForm, int enjoyment, int orgasmCount)
     Actor act = actorForm as Actor
-    SexLabFramework sexlab = SexLabUtil.GetAPI() 
+    SexLabFramework sexlab = SexLabUtil.GetAPI()
     if(!act || !sexlab)
         return
     endif
-    sslThreadController controller = sexlab.GetActorController(act)
-    if(!controller)
+
+    SexLabThread thread = SexLab.GetThreadByActor(act)
+    ; sslThreadController controller = sexlab.GetActorController(act)
+    if(!thread)
         return
     endif
 
     ;If this event came from ostimlab (ie its a OStim scene, then dont process)
-    If (controller.HasTag("OStimLab"))
+    If (thread.HasTag("OStimLab"))
         return
     EndIf
 
     Log("OnSexLabOrgasm: " + actorForm + " enjoyment: " + enjoyment)
     OSLArousedNative.RegisterActorOrgasm(act)
+
+    if (!thread.IsConsent() && thread.GetSubmissive(act))
+        Log("OnSexLabOrgasm(Victim Orgasm): " + actorForm + " enjoyment: " + enjoyment)
+        Log("WIP: Decide what to do here")
+    endif
 
     ;Update arousal for any victims
     ;@TODO: Tie this into a lewdness system
@@ -144,21 +172,23 @@ function StartMasturbationScene(Actor target)
     Actor[] actors = new Actor[1]
     actors[0] = target
 
-    SexLabFramework SexLab = SexLabUtil.GetAPI() 
+    SexLabFramework SexLab = SexLabUtil.GetAPI()
+    String tags = "Masturbation,"
     If 0 == target.GetLeveledActorBase().GetSex()
-        animations = SexLab.GetAnimationsByTag(1, "Masturbation", "M")
+        tags = tags + "M"
     Else
-        animations = SexLab.GetAnimationsByTag(1, "Masturbation", "F")
+        tags = tags + "F"
     EndIf
 
-    Int id = SexLab.StartSex(actors, animations)
-    If id < 0
-        Debug.Notification("SexLab animation failed to start [" + id + "]")
+    SexLabThread thread = SexLab.StartScene(actors, tags)
+    If thread == none
+        Debug.Notification("SexLab animation failed to start [masturbation]")
     EndIf
 endfunction
 
 ; ========== DEBUG RELATED ==================
 
 function Log(string msg) global
-    Debug.Trace("---OSLAroused--- [SexlabAdapter] " + msg)
+    Debug.Trace("---Beef Buns' OSLAroused--- [SexLabAdapter] " + msg)
+    ConsoleUtil.PrintMessage("---Beef Buns' OSLAroused--- [SexLabAdapter] " + msg)
 endfunction
