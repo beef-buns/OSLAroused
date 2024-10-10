@@ -188,4 +188,6 @@ namespace util
 	using SKSE::stl::report_and_fail;
 }
 
+#include <ClibUtil/timer.hpp>
+#include <ClibUtil/singleton.hpp>
 #include "Plugin.h"

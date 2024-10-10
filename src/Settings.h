@@ -95,11 +95,11 @@ public:
 		return m_LibidoChangeRate;
 	}
 
-	void SetNudeArousalBaseline(float newVal) { 
+	void SetNudeArousalBaseline(float newVal) {
 		Locker locker(m_Lock);
-		m_IsNudeBaseline = newVal; 
+		m_IsNudeBaseline = newVal;
 	}
-	float GetNudeArousalBaseline() const { 
+	float GetNudeArousalBaseline() const {
 		Locker locker(m_Lock);
 		return m_IsNudeBaseline;
 	}
@@ -193,11 +193,15 @@ private:
 	float m_ArousalChangeRate = 0.2f;
 	float m_LibidoChangeRate = 0.1f;
 
-	float m_IsNudeBaseline = 30.f;
-	float m_ViewingNudeBaseline = 20.f;
+	// float m_IsNudeBaseline = 30.f;
+	// float m_ViewingNudeBaseline = 20.f;
+	float m_IsNudeBaseline = 0.f;
+	float m_ViewingNudeBaseline = 0.f;
 
-	float m_SceneParticipateBaseline = 50.f;
-	float m_SceneViewingBaseline = 30.f;
+	float m_SceneParticipateBaseline = 0.f;
+	float m_SceneViewingBaseline = 0.f;
+	// float m_SceneParticipateBaseline = 50.f;
+	// float m_SceneViewingBaseline = 30.f;
 	bool m_SceneVictimGainsArousal = false;
 
 	float m_ScanDistance = 5120.f;

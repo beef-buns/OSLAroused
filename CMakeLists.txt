@@ -15,6 +15,9 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 include(XSEPlugin)
+
+find_path(CLIB_UTIL_INCLUDE_DIRS "ClibUtil/utils.hpp")
+
 # include(GNUInstallDirs)
 
 # set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")

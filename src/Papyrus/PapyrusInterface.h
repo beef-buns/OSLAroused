@@ -17,11 +17,13 @@ namespace PapyrusInterface
 	float ModifyArousalMultiplier(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
 
 	float GetArousalBaseline(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+	float ModifyArousalBaseline(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
+	void ModifyArousalBaselineMultiple(RE::StaticFunctionTag* base, RE::reference_array<RE::Actor*> actorRefs, float value);
 
 	float GetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	float SetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef, float newVal);
 
-	
+
 	float GetDaysSinceLastOrgasm(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 
 	bool IsNaked(RE::StaticFunctionTag* base, RE::Actor* actorRef);

@@ -24,6 +24,9 @@ function ModifyArousalMultiple(Actor[] actorArray, float value) global native
 
 ;Retrieves Arousal Baseline
 float function GetArousalBaseline(Actor actor) global native
+float function SetArousalBaseline(Actor actor, float newVal) global native
+float function ModifyArousalBaseline(Actor actor, float value) global native
+function ModifyArousalBaselineMultiple(Actor[] actorArray, float value) global native
 
 ;Retrieves Actor Base Libido
 float function GetLibido(Actor actor) global native

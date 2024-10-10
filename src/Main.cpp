@@ -7,8 +7,10 @@
 
 #include "RuntimeEvents.h"
 #include "Utilities/Utils.h"
+#include "Hooks.h"
 #include "Plugin.h"
 #include "Config.h"
+#include "GameForms.h"
 
 using namespace RE::BSScript;
 using namespace SKSE::log;
@@ -66,13 +68,17 @@ namespace
 		papyrus->Register(PapyrusActor::RegisterFunctions);
 	}
 
-	void InitializeMessaging() 
+	void InitializeMessaging()
 	{
 		if (!SKSE::GetMessagingInterface()->RegisterListener([](SKSE::MessagingInterface::Message* message) {
 			switch (message->type) {
 			case SKSE::MessagingInterface::kDataLoaded:  // All ESM/ESL/ESP plugins have loaded, main menu is now active
+                if (!GameForms::LoadData()) {
+                    logger::critical("Unable to load esp objects");
+                    std::_Exit(EXIT_FAILURE);
+                }
 				RuntimeEvents::OnEquipEvent::RegisterEvent();
-				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
+//				WorldChecks::ArousalUpdateTicker::GetSingleton()->Start();
 				Config::GetSingleton()->LoadINIs();
 				break;
 			case SKSE::MessagingInterface::kPostLoadGame:
@@ -95,6 +101,8 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	SKSE::log::info("{} {} is loading...", plugin->GetName(), version);
 
 	SKSE::Init(a_skse);
+
+    Hooks::Install();
 
 	InitializeMessaging();
 	InitializeSerialization();

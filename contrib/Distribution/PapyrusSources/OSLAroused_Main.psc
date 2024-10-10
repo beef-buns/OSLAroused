@@ -1,19 +1,19 @@
 ScriptName OSLAroused_Main Extends Quest Hidden
 ; This Script is Based off OAroused by Sairion350
-; All the good things are from Sairion and all the bad things are by me :) 
+; All the good things are from Sairion and all the bad things are by me :)
 
 OSLAroused_Main Function Get() Global
 	return Game.GetFormFromFile(0x806, "OSLAroused.esp") as OSLAroused_Main
 EndFunction
 
-Actor Property PlayerRef Auto 
+Actor Property PlayerRef Auto
 
-slaFrameworkScr Property SlaFrameworkStub Auto 
+slaFrameworkScr Property SlaFrameworkStub Auto
 
 float Property ScanDistance = 5120.0 AutoReadOnly
 
 OSLAroused_ArousalBar Property ArousalBar Auto
-OSLAroused_Conditions Property ConditionVars Auto 
+OSLAroused_Conditions Property ConditionVars Auto
 
 bool property OStimAdapterLoaded = false Auto Hidden
 bool property IsOStimLegacy = false Auto Hidden
@@ -42,10 +42,16 @@ float Property LibidoChangeRate = 10.0 Auto
 float Property MinLibidoValuePlayer = 30.0 Auto
 float Property MinLibidoValueNPC = 80.0 Auto
 
-float Property SceneParticipationBaselineIncrease = 50.0 Auto
-float Property SceneViewingBaselineIncrease = 20.0 Auto
+; float Property SceneParticipationBaselineIncrease = 50.0 Auto
+; float Property SceneViewingBaselineIncrease = 20.0 Auto
+float Property SceneParticipationBaselineIncrease = 0.0 Auto
+float Property SceneViewingBaselineIncrease = 0.0 Auto
+
 bool Property VictimGainsArousal = false Auto
-float Property NudityBaselineIncrease = 30.0 Auto
+
+; float Property NudityBaselineIncrease = 30.0 Auto
+float Property NudityBaselineIncrease = 0.0 Auto
+
 float Property ViewingNudityBaselineIncrease = 20.0 Auto
 float Property EroticArmorBaselineIncrease = 20.0 Auto
 
@@ -56,7 +62,7 @@ float Property SceneEndArousalNoOrgasmChange = -40.0 Auto
 float Property SceneEndArousalOrgasmChange = 0.0 Auto
 
 bool Property EnableArousalStatBuffs = true Auto
-bool Property EnableSOSIntegration = true Auto 
+bool Property EnableSOSIntegration = true Auto
 
 bool Property EnableDebugMode = true Auto
 
@@ -165,7 +171,7 @@ EndFunction
 ;Works as expected need to debug through papyrus
 event OnActorArousalUpdated(string eventName, string strArg, float newArousal, Form sender)
 	Actor act = sender as Actor
-	
+
 	;Log("OnActorArousalUpdated for: " + act.GetDisplayName() + " Exposure: " + newExposure + " Frustration: " + lastOrgasmArousal + " Arousal: " + newArousal)
 	if(act == PlayerRef)
 		ArousalBar.SetPercent(newArousal / 100.0)
@@ -175,9 +181,15 @@ event OnActorArousalUpdated(string eventName, string strArg, float newArousal, F
 
 		if EnableArousalStatBuffs
 			ApplyArousedEffects()
-		else  
+		else
 			RemoveAllArousalSpells()
 		endif
+	endif
+
+	if newArousal >= 90
+		SetMinLibidoValue(act, 90.0)
+	elseif newArousal < 60
+		SetMinLibidoValue(act, 30.0)
 	endif
 
 	UpdateSOSPosition(act, newArousal)
@@ -191,7 +203,7 @@ event OnActorNakedUpdated(string eventName, string strArg, float actorNakedFloat
 	bool isActorNaked = actorNakedFloat > 0
 	Actor act = sender as Actor
 	;Log("OnActorNakedUpdated for: " + act.GetDisplayName() + " - newNaked: " + isActorNaked)
-	
+
 	if(SlaFrameworkStub && act)
 		SlaFrameworkStub.OnActorNakedUpdated(act, isActorNaked)
 	endif
@@ -203,7 +215,7 @@ function SetArousalEffectsEnabled(bool enabled)
 	EnableArousalStatBuffs = enabled
 	if EnableArousalStatBuffs
 		ApplyArousedEffects()
-	else  
+	else
 		RemoveAllArousalSpells()
 	endif
 endfunction
@@ -221,11 +233,14 @@ EndFunction
 
 Event OnKeyDown(int keyCode)
 	if Utility.IsInMenuMode()
-		return 
+		return
 	endif
+
 	if keyCode == CheckArousalKey
 		Debug.Notification(PlayerRef.GetDisplayName() + " arousal level " + OSLArousedNative.GetArousal(PlayerRef))
-		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef) + "    Libido: " + OSLArousedNative.GetLibido(PlayerRef))
+		Debug.Notification("Baseline Arousal: " + OSLArousedNative.GetArousalBaseline(PlayerRef))
+		Debug.Notification("Libido: " + OSLArousedNative.GetLibido(PlayerRef))
+		Debug.Notification("Arousal Multiplier: " + OSLArousedNative.GetArousalMultiplier(PlayerRef))
 		if(ArousalBar.DisplayMode == ArousalBar.kDisplayMode_Fade)
 			ArousalBar.UpdateDisplay()
 		endif

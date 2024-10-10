@@ -30,7 +30,8 @@
         "frozen",
         "directxtk",
         "catch2",
-        "rapidcsv"
+        "rapidcsv",
+        "clib-util"
       ]
     }
   },

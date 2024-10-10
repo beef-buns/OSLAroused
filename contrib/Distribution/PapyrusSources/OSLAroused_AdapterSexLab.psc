@@ -40,16 +40,30 @@ event OnAnimationStart(int tid, bool hasPlayer)
     ;TODO: Add lewd faction check or whatever it is
 
     if thread.IsConsent() || Main.VictimGainsArousal
+        Log("OnAnimationStart - Scene is treated as consensual")
         ;OArousal mode sends a blast on scene start
+        OSLArousedNative.ModifyArousalBaselineMultiple(actors, 80.0)
         OSLAroused_ModInterface.ModifyArousalMultiple(actors, Main.SceneBeginArousalGain, "Sexlab Animation Start")
     else
         int i = actors.Length
         while(i > 0)
+            i -= 1
             Actor act = actors[i]
+            float actorArousal = OSLAroused_ModInterface.GetArousal(act)
+
             if !thread.GetSubmissive(act)
                 OSLAroused_ModInterface.ModifyArousal(act, Main.SceneBeginArousalGain, "SexLab Animation Start - Aggressor")
             else
-                OSLAroused_ModInterface.ModifyArousal(act, Main.SceneBeginArousalGain * -1, "SexLab Animation Start - Aggressor")
+                Log("OnAnimationStart - Victim")
+                if actorArousal < 90
+                    Log("OnAnimationStart - Victim is not highly aroused")
+                    OSLArousedNative.ModifyArousalBaseline(act, -50)
+                    OSLAroused_ModInterface.ModifyArousal(act, Main.SceneBeginArousalGain * -1)
+                else
+                    Log("OnAnimationStart - Victim is highly aroused")
+                    OSLArousedNative.SetArousalBaseline(act, 100)
+                    OSLAroused_ModInterface.ModifyArousal(act, Main.SceneBeginArousalGain)
+                endif
             endif
         endwhile
 
@@ -85,8 +99,10 @@ event OnAnimationEnd(int tid, bool hasPlayer)
         ; if((controller.ActorAlias(act) as sslActorAlias).GetOrgasmCount() > 0)
         ;     OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalOrgasmChange, "sexlab end - SLSO orgasm")
         if(thread.IsConsent())
+            OSLArousedNative.ModifyArousalBaseline(act, -80.0)
             OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
         elseif (!thread.GetSubmissive(act) || (Main.VictimGainsArousal && thread.GetSubmissive(act)))
+            OSLArousedNative.ModifyArousalBaseline(act, -80.0)
             OSLAroused_ModInterface.ModifyArousal(act, Main.SceneEndArousalNoOrgasmChange, "sexlab end - SLSO no orgasm")
         endif
     endwhile
