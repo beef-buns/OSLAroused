@@ -97,9 +97,11 @@
 #include <version>
 
 #include <new>
-void* operator new[](size_t size, const char* pName, int flags, unsigned debugFlags, const char* file, int line);
-void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char* pName, int flags,
-	unsigned debugFlags, const char* file, int line);
+
+void *operator new[](size_t size, const char *pName, int flags, unsigned debugFlags, const char *file, int line);
+
+void *operator new[](size_t size, size_t alignment, size_t alignmentOffset, const char *pName, int flags,
+                     unsigned debugFlags, const char *file, int line);
 
 #pragma warning(disable: 4702)
 #pragma warning(push)
@@ -111,9 +113,11 @@ void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, cons
 #	define SKSEPlugin_Load F4SEPlugin_Load
 #	define SKSEPlugin_Query F4SEPlugin_Query
 #else
+
 #	include "RE/Skyrim.h"
 #	include "SKSE/SKSE.h"
 #	include "REL/Relocation.h"
+
 #endif
 
 #include <spdlog/sinks/basic_file_sink.h>
@@ -122,6 +126,7 @@ void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, cons
 #pragma warning(pop)
 
 #define WIN32_LEAN_AND_MEAN 1
+
 #include <Windows.h>
 
 #define DLLEXPORT __declspec(dllexport)
@@ -129,65 +134,92 @@ void* operator new[](size_t size, size_t alignment, size_t alignmentOffset, cons
 using namespace std::literals;
 using namespace REL::literals;
 
-namespace stl
-{
-	using namespace SKSE::stl;
+namespace stl {
+    using namespace SKSE::stl;
 
-	constexpr std::string_view safe_string(const char* a_str) { return a_str ? a_str : ""sv; }
+    constexpr std::string_view safe_string(const char *a_str) { return a_str ? a_str : ""sv; }
 
-	template <class T>
-	void write_thunk_call(std::uintptr_t a_src)
-	{
-		SKSE::AllocTrampoline(14);
-		auto& trampoline = SKSE::GetTrampoline();
-		T::func = trampoline.write_call<5>(a_src, T::thunk);
-	}
+    inline bool read_string(SKSE::SerializationInterface *a_intfc, std::string &a_str) {
+        std::size_t size = 0;
+        if (!a_intfc->ReadRecordData(size)) {
+            return false;
+        }
+        a_str.reserve(size);
+        if (!a_intfc->ReadRecordData(a_str.data(), static_cast<std::uint32_t>(size))) {
+            return false;
+        }
+        return true;
+    }
 
-	template <class T>
-	void write_thunk_call_6(std::uintptr_t a_src)
-	{
-		SKSE::AllocTrampoline(14);
-		auto& trampoline = SKSE::GetTrampoline();
-		T::func = *(uintptr_t*)trampoline.write_call<6>(a_src, T::thunk);
-	}
+    inline bool write_string(SKSE::SerializationInterface *a_intfc, const std::string &a_str) {
+        std::size_t size = a_str.length() + 1;
+        return a_intfc->WriteRecordData(size) &&
+               a_intfc->WriteRecordData(a_str.data(), static_cast<std::uint32_t>(size));
+    }
 
-	template <class F, size_t index, class T>
-	void write_vfunc()
-	{
-		REL::Relocation<std::uintptr_t> vtbl{ F::VTABLE[index] };
-		T::func = vtbl.write_vfunc(T::size, T::thunk);
-	}
+    inline std::optional<RE::FormID> ReadFormID(SKSE::SerializationInterface *a_intfc) {
+        RE::FormID a_formID;
+        a_intfc->ReadRecordData(a_formID);
+        if (a_formID != 0) {
+            auto result = a_intfc->ResolveFormID(a_formID, a_formID);
+            if (result) {
+                return a_formID;
+            }
+        }
+        return std::nullopt;
+    }
 
-	template <std::size_t idx, class T>
-	void write_vfunc(REL::VariantID id)
-	{
-		REL::Relocation<std::uintptr_t> vtbl{ id };
-		T::func = vtbl.write_vfunc(idx, T::thunk);
-	}
+    template<class T>
+    void write_thunk_call() {
+        SKSE::AllocTrampoline(14);
+        auto &trampoline = SKSE::GetTrampoline();
+        T::func = trampoline.write_call<5>(T::hook.address(), T::thunk);
+    }
 
-	template <class T>
-	void write_thunk_jmp(std::uintptr_t a_src)
-	{
-		SKSE::AllocTrampoline(14);
-		auto& trampoline = SKSE::GetTrampoline();
-		T::func = trampoline.write_branch<5>(a_src, T::thunk);
-	}
+    template<class T>
+    void write_thunk_call_6(std::uintptr_t a_src) {
+        SKSE::AllocTrampoline(14);
+        auto &trampoline = SKSE::GetTrampoline();
+        T::func = *(uintptr_t *) trampoline.write_call<6>(a_src, T::thunk);
+    }
 
-	template <class F, class T>
-	void write_vfunc()
-	{
-		write_vfunc<F, 0, T>();
-	}
+    template<class F, size_t index, class T>
+    void write_vfunc() {
+        REL::Relocation<std::uintptr_t> vtbl{F::VTABLE[index]};
+        T::func = vtbl.write_vfunc(T::size, T::thunk);
+    }
+
+    template<std::size_t idx, class T>
+    void write_vfunc(REL::VariantID id) {
+        REL::Relocation<std::uintptr_t> vtbl{id};
+        T::func = vtbl.write_vfunc(idx, T::thunk);
+    }
+
+    template<class T>
+    void write_thunk_jmp(std::uintptr_t a_src) {
+        SKSE::AllocTrampoline(14);
+        auto &trampoline = SKSE::GetTrampoline();
+        T::func = trampoline.write_branch<5>(a_src, T::thunk);
+    }
+
+    template<class F, class T>
+    void write_vfunc() {
+        write_vfunc<F, 0, T>();
+    }
 }
 
 namespace logger = SKSE::log;
 namespace WinAPI = REX::W32;
 
-namespace util
-{
-	using SKSE::stl::report_and_fail;
+namespace util {
+    using SKSE::stl::report_and_fail;
 }
 
 #include <ClibUtil/timer.hpp>
 #include <ClibUtil/singleton.hpp>
+#include <ClibUtil/editorID.hpp>
+#include <ClibUtil/distribution.hpp>
+#include <ClibUtil/simpleINI.hpp>
 #include "Plugin.h"
+
+using namespace clib_util::singleton;

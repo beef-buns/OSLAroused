@@ -1,43 +1,67 @@
 #pragma once
-#include "PCH.h"
+
 #include "Utilities/LRUCache.h"
+#include "ActorState.h"
 
-bool IsActorNaked(RE::Actor* actorRef);
-
+bool IsActorNaked(RE::Actor *actorRef);
 
 const static RE::FormID kActorTypeCreatureKeywordFormId = 0x13795;
 const static RE::FormID kActorTypeAnimalKeywordFormId = 0x13798;
 
-class ActorStateManager
-{
+class ActorStateManager : public ISingleton<ActorStateManager> {
 public:
 
-	static ActorStateManager* GetSingleton()
-	{
-		static ActorStateManager singleton;
-		return &singleton;
-	}
 
-	ActorStateManager() :
-		m_ActorNakedStateCache(std::function<bool(RE::Actor*)>(IsActorNaked), 100),
-		m_CreatureKeyword((RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId)),
-		m_AnimalKeyword((RE::BGSKeyword*)RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId)) {}
+    ActorStateManager() :
+            wornKeywordCache(),
+            m_ActorNakedStateCache(std::function < bool(RE::Actor * ) > (IsActorNaked), 100),
+            m_CreatureKeyword((RE::BGSKeyword *) RE::TESForm::LookupByID(kActorTypeCreatureKeywordFormId)),
+            m_AnimalKeyword((RE::BGSKeyword *) RE::TESForm::LookupByID(kActorTypeAnimalKeywordFormId)) {}
 
-	bool GetActorNaked(RE::Actor* actorRef);
-	void ActorNakedStateChanged(RE::Actor* actorRef, bool newNaked);
+    bool GetActorNaked(RE::Actor *actorRef);
 
-	bool GetActorSpectatingNaked(RE::Actor* actorRef);
-	void UpdateActorsSpectating(std::set<RE::Actor*> spectators);
+    std::optional<Arousal::ActorState *> GetActorState(RE::Actor *actorRef);
 
-	//Returns true if actor is non-creature, non-animal npc
-	bool IsHumanoidActor(RE::Actor* actorRef);
+    float GetActorArousal(RE::Actor *actorRef);
+    float GetActorExposure(RE::Actor *actorRef);
+    float GetActorExposureRate(RE::Actor *actorRef);
+    float GetActorTimeRate(RE::Actor *actorRef);
+
+    void UpdateActorArousal(RE::Actor *actor);
+    void UpdateActorExposureModifier(RE::Actor *actor, const std::string_view &name, float value);
+
+    void ActorNakedStateChanged(RE::Actor *actorRef, bool newNaked);
+
+    bool GetActorSpectatingNaked(RE::Actor *actorRef);
+
+    void UpdateActorsSpectating(std::set<RE::Actor *> spectators);
+
+    //Returns true if actor is non-creature, non-animal npc
+    bool IsHumanoidActor(RE::Actor *actorRef);
+
+    void UpdateWornKeywordCache(RE::Actor *actorRef, RE::TESObjectARMO *armor, bool equipped);
+
+    bool Load(SKSE::SerializationInterface *a_intfc);
+
+    bool Save(SKSE::SerializationInterface *a_intfc);
 
 private:
 
-	Utilities::LRUCache<RE::Actor*, bool> m_ActorNakedStateCache;
+    using Lock = std::recursive_mutex;
+    using Locker = std::lock_guard<Lock>;
+    mutable Lock m_Lock;
 
-	std::map<RE::Actor*, float> m_NakedSpectatingMap;
+    Utilities::LRUCache<RE::Actor *, bool> m_ActorNakedStateCache;
 
-	RE::BGSKeyword* m_CreatureKeyword;
-	RE::BGSKeyword* m_AnimalKeyword;
+//    std::map<RE::FormID,
+//    std::map<RE::FormID, std::map<RE::FormID, int>> wornKeywordCache;
+    std::map<RE::FormID, std::map<std::string_view, int>> wornKeywordCache;
+
+    std::map<RE::Actor *, float> m_NakedSpectatingMap;
+
+    RE::BGSKeyword *m_CreatureKeyword;
+    RE::BGSKeyword *m_AnimalKeyword;
+
+    std::map<RE::FormID, Arousal::ActorState> Actors;
+
 };

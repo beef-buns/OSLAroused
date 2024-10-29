@@ -49,7 +49,16 @@ namespace GameForms {
     inline RE::TESFaction *sla_Exposure;
     inline RE::TESFaction *sla_ExposureRate;
     inline RE::TESFaction *sla_Arousal;
+    inline RE::TESFaction *sla_Arousal_Locked;
+    inline RE::TESFaction *sla_Arousal_Blocked;
     inline RE::TESFaction *sla_TimeRate;
+
+//    ;SexLabGenderFaction
+//    ;SexLabForbiddenActors
+//    ;SexLabPlayerSexFaction
+//
+//    SexLab.esm|0x043A43,SexLab.esm|0x049068,SexLab.esm|0x04E12F
+
 
 //    ;SLAX_AttractedToFutasFaction
 //    ;SLAX_SadistFaction
@@ -60,6 +69,27 @@ namespace GameForms {
 //    ;SLAX_PainAddictFaction
 //    ;SLAX_PainFearfulFaction
 //    SexLabAroused.esm|0x08F8A4,SexLabAroused.esm|0x08F8A5,SexLabAroused.esm|0x08F8A6,SexLabAroused.esm|0x08F8A7,SexLabAroused.esm|0x08F8A8,SexLabAroused.esm|0x08F8A9,SexLabAroused.esm|0x08F8AA,SexLabAroused.esm|0x08F8AB
+
+
+//    ;SLAX_BoobsNiceFaction
+//    ;SLAX_BoobsAmazingFaction
+//    ;SLAX_BoobsBigFaction
+//    ;SLAX_BoobsFullFaction
+//    ;SLAX_BoobsEnormousFaction
+//    ;SLAX_BoobsTinyFaction
+//    ;SLAX_AssTinyFaction
+//    ;SLAX_AssNiceFaction
+//    ;SLAX_AssAmazingFaction
+//    ;SLAX_AssBigFaction
+//    ;SLAX_CockSmallFaction
+//    ;SLAX_CockAverageFaction
+//    ;SLAX_CockBigFaction
+//    ;SLAX_CockHugeFaction
+//    ;SLAX_AssLoverFaction
+//    ;SLAX_BreastLoverFaction
+//
+//    SexLabAroused.esm|0x08F8CC,SexLabAroused.esm|0x08F8CD,SexLabAroused.esm|0x08F8CE,SexLabAroused.esm|0x08F8CF,SexLabAroused.esm|0x08F8D0,SexLabAroused.esm|0x08F8D4,SexLabAroused.esm|0x08F8D5,SexLabAroused.esm|0x08F8D6,SexLabAroused.esm|0x08F8D7,SexLabAroused.esm|0x08F8D8,SexLabAroused.esm|0x08F8E4,SexLabAroused.esm|0x08F8E5,SexLabAroused.esm|0x08F8E6,SexLabAroused.esm|0x08F8E7,SexLabAroused.esm|0x08FE70,SexLabAroused.esm|0x08FE71
+
 
 
     inline bool LoadData() {
@@ -78,6 +108,14 @@ namespace GameForms {
         LOOKUPMOD(sla_Naked, sla_NakedFormID, "SexLabAroused.esm")
         LOOKUPMOD(sla_Exhibitionist, sla_ExhibitionistFormID, "SexLabAroused.esm")
         LOOKUPMOD(sla_Arousal, sla_ArousalFormID, "SexLabAroused.esm")
+//        ;sla_Arousal_Blocked
+//                ;sla_Arousal_Locked
+//
+//        SexLabAroused.esm|0x06E8C6,SexLabAroused.esm|0x07649C
+
+        LOOKUPMOD(sla_Arousal_Blocked, RE::FormID(0x06E8C6), "SexLabAroused.esm")
+        LOOKUPMOD(sla_Arousal_Locked, RE::FormID(0x07649C), "SexLabAroused.esm")
+
         LOOKUPMOD(sla_TimeRate, sla_TimeRateFormID, "SexLabAroused.esm")
         LOOKUPMOD(sla_Exposure, sla_ExposureFormID, "SexLabAroused.esm")
         LOOKUPMOD(sla_ExposureRate, sla_ExposureRateFormID, "SexLabAroused.esm")

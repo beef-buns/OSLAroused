@@ -27,6 +27,26 @@ namespace Utilities {
         bool RemoveKeyword(RE::TESForm *form, RE::BGSKeyword *keyword);
 
         void DistributeKeywords();
+
+        inline int GetWornKeywordCount(RE::Actor *actor, std::string_view editorID) {
+            int keywordCount = 0;
+
+            const auto actorEquipment = actor->GetInventory(
+                    [=](RE::TESBoundObject &a_object) { return a_object.IsArmor(); });
+
+            std::vector<RE::FormID> eroticArmors;
+            for (const auto &[item, invData]: actorEquipment) {
+                const auto &[count, entry] = invData;
+                if (count > 0 && entry->IsWorn()) {
+                    if (item->As<RE::TESObjectARMO>() &&
+                        item->As<RE::TESObjectARMO>()->ContainsKeywordString(editorID)) {
+                        keywordCount++;
+                    }
+                }
+            }
+
+            return keywordCount;
+        }
     }
 
     namespace Actor {
@@ -59,7 +79,7 @@ namespace Utilities {
                 return false;
             }
 
-            if (!actor->As<RE::Actor>()) {
+            if (!actor->As<RE::Actor>() || actor->As<RE::Actor>()->IsInFaction(GameForms::sla_Arousal_Blocked)) {
                 return false;
             }
 
@@ -85,13 +105,24 @@ namespace Utilities {
         using tTESNPC_GetRelationshipRankIndex = int32_t(*)(RE::TESNPC *a_npc1, RE::TESNPC *a_npc2);
         inline static REL::Relocation<tTESNPC_GetRelationshipRankIndex> TESNPC_GetRelationshipRankIndex{
                 REL::VariantID(23624, 24076, 0x355790)};  // 345ED0, 35C270, 355790
-        inline bool GetRelationshipRank(RE::TESNPC *a_npc1, RE::TESNPC *a_npc2, int32_t &a_outRank) {
+
+        inline bool GetRelationshipRankImpl(RE::TESNPC *a_npc1, RE::TESNPC *a_npc2, int32_t &a_outRank) {
             if (a_npc1 && a_npc2) {
                 a_outRank = g_RelationshipRankTypeIdsByIndex[TESNPC_GetRelationshipRankIndex(a_npc1, a_npc2)];
                 return true;
             }
 
             return false;
+        }
+
+        inline std::optional<int32_t> GetRelationshipRank(RE::TESNPC *a_npc1, RE::TESNPC *a_npc2) {
+            int32_t a_outRank;
+
+            if (GetRelationshipRankImpl(a_npc1, a_npc2, a_outRank)) {
+                return a_outRank;
+            } else {
+                return std::nullopt;
+            }
         }
 
         inline bool ValidateTarget(RE::Actor *actor, RE::Actor *target) {

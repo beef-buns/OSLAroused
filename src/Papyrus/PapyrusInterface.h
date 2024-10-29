@@ -23,6 +23,10 @@ namespace PapyrusInterface
 	float GetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	float SetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef, float newVal);
 
+    float GetExposure(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+    float GetExposureRate(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+    float GetTimeRate(RE::StaticFunctionTag* base, RE::Actor* actorRef);
+
 
 	float GetDaysSinceLastOrgasm(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 

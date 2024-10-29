@@ -7,7 +7,7 @@ namespace Debug
 	void DumpAllArousalData()
 	{
 		PersistedData::ArousalData::GetSingleton()->DumpToLog();
-		PersistedData::BaseLibidoData::GetSingleton()->DumpToLog();
+		PersistedData::ExposureData::GetSingleton()->DumpToLog();
 		PersistedData::ArousalMultiplierData::GetSingleton()->DumpToLog();
 		PersistedData::LastCheckTimeData::GetSingleton()->DumpToLog();
 	}
@@ -15,7 +15,7 @@ namespace Debug
 	void ClearAllArousalData()
 	{
 		PersistedData::ArousalData::GetSingleton()->Clear();
-		PersistedData::BaseLibidoData::GetSingleton()->Clear();
+		PersistedData::ExposureData::GetSingleton()->Clear();
 		PersistedData::ArousalMultiplierData::GetSingleton()->Clear();
 		PersistedData::LastCheckTimeData::GetSingleton()->Clear();
 	}
