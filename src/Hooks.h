@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Utilities/Utils.h"
-#include "Managers/ArousalManager.h"
+#include "Managers/ActorStateManager.h"
+#include "Settings.h"
 
 namespace Hooks {
     class ActorUpdateHook {
@@ -9,8 +10,8 @@ namespace Hooks {
         inline static REL::Relocation hook = REL::Relocation<std::uintptr_t>(REL::ID(37348), 0x1AA);
 
         inline static std::int32_t thunk(RE::Actor *actor) {
-            if (!RE::UI::GetSingleton()->GameIsPaused()) {
-                ArousalManager::Update(actor);
+            if (Settings::GetSingleton()->IsEnabled() && !RE::UI::GetSingleton()->GameIsPaused()) {
+                ActorStateManager::GetSingleton()->UpdateActorArousal(actor);
             }
             return func(actor);
         }

@@ -29,7 +29,7 @@ bool ActorStateManager::GetActorSpectatingNaked(RE::Actor *actorRef) {
     return false;
 }
 
-void ActorStateManager::UpdateActorsSpectating(std::set<RE::Actor *> spectators) {
+void ActorStateManager::UpdateActorsSpectating(const std::set<RE::Actor *> &spectators) {
     //Remove any old spectators from map who are not in spectators set
     //Need to do this to purge libido modifier cache
     for (auto itr = m_NakedSpectatingMap.begin(); itr != m_NakedSpectatingMap.end();) {
@@ -255,4 +255,23 @@ void ActorStateManager::UpdateActorExposureModifier(RE::Actor *actorRef, const s
     auto data = actorState.value();
 
     data->SetExposureModifier(name, value);
+}
+
+void ActorStateManager::ModifyActorExposureModifier(RE::Actor *actorRef, const std::string_view &name, float value) {
+    const auto actorState = GetActorState(actorRef);
+    if (!actorState) {
+        return;
+    }
+
+    auto data = actorState.value();
+
+    data->ModifyExposureModifier(name, value);
+}
+
+void ActorStateManager::SetActorExposureRate(RE::Actor *actorRef, float value) {
+    GetActorState(actorRef).transform([&](auto actorState) {
+        actorState->SetExposureRate(value);
+
+        return actorState;
+    });
 }

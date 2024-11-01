@@ -16,9 +16,9 @@ namespace PapyrusInterface
 	float SetArousalMultiplier(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
 	float ModifyArousalMultiplier(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
 
-	float GetArousalBaseline(RE::StaticFunctionTag* base, RE::Actor* actorRef);
-	float ModifyArousalBaseline(RE::StaticFunctionTag* base, RE::Actor* actorRef, float value);
-	void ModifyArousalBaselineMultiple(RE::StaticFunctionTag* base, RE::reference_array<RE::Actor*> actorRefs, float value);
+	float GetExposure(RE::StaticFunctionTag*, RE::Actor* actorRef);
+	float ModifyExposure(RE::StaticFunctionTag*, RE::Actor* actorRef, float value);
+	void ModifyExposureMultiple(RE::StaticFunctionTag*, RE::reference_array<RE::Actor*> actorRefs, float value);
 
 	float GetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef);
 	float SetLibido(RE::StaticFunctionTag* base, RE::Actor* actorRef, float newVal);

@@ -16,6 +16,11 @@ float function GetArousalNoSideEffects(Actor actor) global native
 float function SetArousal(Actor actor, float value) global native
 function SetArousalMultiple(Actor[] actorArray, float value) global native
 
+float function GetExposure(Actor actor) global native
+float function SetExposure(Actor actor, float newVal) global native
+
+float function GetTimeRate(Actor actor) global native
+
 ;Modifies the arousal value by the specified amount (Relative to current arousal value)
 float function ModifyArousal(Actor actor, float value) global native
 

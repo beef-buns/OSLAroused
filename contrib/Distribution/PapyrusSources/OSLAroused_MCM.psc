@@ -104,7 +104,7 @@ int HelpGainBaselineOid
 int HelpLowerBaselineOid
 
 int function GetVersion()
-    return 251 ; 2.5.1
+    return 300 ; 3.0.0
 endfunction
 
 Event OnConfigInit()
@@ -150,7 +150,7 @@ Event OnGameLoaded()
     parent.OnGameReload()
 
     PuppetActor = Game.GetPlayer()
-    
+
     EroticArmorKeyword = Keyword.GetKeyword("EroticArmor")
 
     string[] keywords = OSLArousedNative.GetRegisteredKeywords()
@@ -262,7 +262,7 @@ function PuppeteerPage(Actor target)
 
     float libido = OSLArousedNative.GetLibido(PuppetActor)
     SetLibidoOid = AddSliderOption("$OSL_Libido", ((libido * 100) / 100) as int, "{1}")
-    
+
     float arousalMultiplier = OSLArousedNative.GetArousalMultiplier(PuppetActor)
     SetArousalMultiplierOid = AddSliderOption("$OSL_ArousalMultiplier", arousalMultiplier, "{1}")
 
@@ -403,7 +403,7 @@ event OnOptionSelect(int optionId)
             Main.VictimGainsArousal = !Main.VictimGainsArousal
             SetToggleOptionValue(VictimGainsArousalOid, Main.VictimGainsArousal)
         elseif(optionId == EnableStatBuffsOid)
-            Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs) 
+            Main.SetArousalEffectsEnabled(!Main.EnableArousalStatBuffs)
             SetToggleOptionValue(EnableStatBuffsOid, Main.EnableArousalStatBuffs)
         elseif(optionId == EnableSOSIntegrationOid)
             Main.EnableSOSIntegration = !Main.EnableSOSIntegration
@@ -478,7 +478,7 @@ event OnOptionHighlight(int optionId)
     elseif(optionId == ArousalMultiplierStatusOid)
         SetInfoText("$OSL_InfoMultiplier")
     endif
-    
+
     if(CurrentPage == "$OSL_Overview")
         if(optionId == SLAStubLoadedOid)
             If (Main.InvalidSlaFound)

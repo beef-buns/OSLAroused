@@ -28,8 +28,14 @@ namespace Arousal {
 
         inline void SetExposure(float val) { exposure = std::clamp(val, 0.f, 100.f); };
 
+        inline void SetExposureRate(float val) { exposureRate = std::clamp(val, 0.f, 10.f); };
+
         inline void SetExposureModifier(const std::string_view &name, float value) {
             exposureModifiers[name] = value;
+        }
+
+        inline void ModifyExposureModifier(const std::string_view &name, float value) {
+            exposureModifiers[name] += value;
         }
 
         inline void RemoveExposureModifier(const std::string_view &name) {

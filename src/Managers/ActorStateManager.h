@@ -23,18 +23,52 @@ public:
     std::optional<Arousal::ActorState *> GetActorState(RE::Actor *actorRef);
 
     float GetActorArousal(RE::Actor *actorRef);
+
     float GetActorExposure(RE::Actor *actorRef);
+
     float GetActorExposureRate(RE::Actor *actorRef);
+
     float GetActorTimeRate(RE::Actor *actorRef);
 
+    inline static float GetArousal(RE::Actor *actorRef) {
+        return GetSingleton()->GetActorArousal(actorRef);
+    }
+
+    inline static float GetExposure(RE::Actor *actorRef) {
+        return GetSingleton()->GetActorExposure(actorRef);
+    }
+
+    inline static float GetExposureRate(RE::Actor *actorRef) {
+        return GetSingleton()->GetActorExposureRate(actorRef);
+    }
+
     void UpdateActorArousal(RE::Actor *actor);
+
     void UpdateActorExposureModifier(RE::Actor *actor, const std::string_view &name, float value);
+
+    void ModifyActorExposureModifier(RE::Actor *actor, const std::string_view &name, float value);
+
+    inline static void SetArousal(RE::Actor *actorRef, float value) {
+        GetSingleton()->UpdateActorExposureModifier(actorRef, "SetArousal", value);
+    }
+
+    inline static void ModifyArousal(RE::Actor *actorRef, float value) {
+        GetSingleton()->UpdateActorExposureModifier(actorRef, "SetArousal", value);
+    }
+
+    inline static void SetExposure(RE::Actor *actorRef, float value) {
+        GetSingleton()->UpdateActorExposureModifier(actorRef, "SetExposure", value);
+    }
+
+    inline static void ModifyExposure(RE::Actor *actorRef, float value) {
+        GetSingleton()->ModifyActorExposureModifier(actorRef, "SetExposure", value);
+    }
 
     void ActorNakedStateChanged(RE::Actor *actorRef, bool newNaked);
 
     bool GetActorSpectatingNaked(RE::Actor *actorRef);
 
-    void UpdateActorsSpectating(std::set<RE::Actor *> spectators);
+    void UpdateActorsSpectating(const std::set<RE::Actor *>& spectators);
 
     //Returns true if actor is non-creature, non-animal npc
     bool IsHumanoidActor(RE::Actor *actorRef);
@@ -44,6 +78,8 @@ public:
     bool Load(SKSE::SerializationInterface *a_intfc);
 
     bool Save(SKSE::SerializationInterface *a_intfc);
+
+    void SetActorExposureRate(RE::Actor *actorRef, float value);
 
 private:
 

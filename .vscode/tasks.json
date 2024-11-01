@@ -2,26 +2,6 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "pyro",
-      "projectFile": "Debug.ppj",
-      "gamePath": "C:\\Games\\Steam\\steamapps\\common\\Skyrim Special Edition\\",
-      "problemMatcher": ["$PapyrusCompiler"],
-      "label": "Compile Papyrus Scripts (Debug)",
-      "group": {
-        "kind": "build"
-      }
-    },
-    {
-      "type": "pyro",
-      "projectFile": "Release.ppj",
-      "gamePath": "C:\\Games\\Steam\\steamapps\\common\\Skyrim Special Edition\\",
-      "problemMatcher": ["$PapyrusCompiler"],
-      "label": "Compile Papyrus Scripts (Release)",
-      "group": {
-        "kind": "build"
-      }
-    },
-    {
       "type": "cmake",
       "label": "CMake: build",
       "command": "build",

@@ -66,7 +66,7 @@ public:
         logger::info("Loaded updateRate: {}", settings->updateRate);
     }
 
-    float IsEnabled() const {
+    bool IsEnabled() const {
         return enabled;
     }
 

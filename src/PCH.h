@@ -137,6 +137,11 @@ using namespace REL::literals;
 namespace stl {
     using namespace SKSE::stl;
 
+    template<typename T>
+    std::optional<T *> optional_ptr(T *ptr) {
+        return ptr ? std::optional<T *>(ptr) : std::optional<T *>();
+    }
+
     constexpr std::string_view safe_string(const char *a_str) { return a_str ? a_str : ""sv; }
 
     inline bool read_string(SKSE::SerializationInterface *a_intfc, std::string &a_str) {
